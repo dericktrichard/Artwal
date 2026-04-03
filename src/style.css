@@ -1,0 +1,151 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    overflow: hidden;
+    background: #000;
+    font-family: 'Courier New', monospace;
+}
+
+#app {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+canvas { 
+    display: block; 
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#weather {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #fff;
+    background: rgba(0,0,0,0.7);
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 13px;
+    pointer-events: auto;
+}
+
+#music {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.8);
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 4px;
+    color: #fff;
+    min-width: 150px;
+    pointer-events: auto;
+}
+
+#track {
+    color: #e8c547;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+#progress {
+    width: 100%;
+    height: 2px;
+    background: #333;
+}
+
+#bar {
+    height: 100%;
+    background: #e8c547;
+    width: 0%;
+    transition: width 0.1s;
+}
+
+#discovery {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.95);
+    border: 1px solid #e8c547;
+    padding: 20px 30px;
+    max-width: 500px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: auto;
+}
+
+#discovery.visible { opacity: 1; }
+#discovery.hidden { opacity: 0; }
+
+#type {
+    color: #e8c547;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+#content {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+#author {
+    color: #666;
+    font-size: 11px;
+    margin-top: 8px;
+}
+
+#controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    color: rgba(255,255,255,0.6);
+    font-size: 11px;
+    text-align: right;
+    background: rgba(0,0,0,0.6);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.key {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin: 0 2px;
+    color: #fff;
+    font-size: 10px;
+}
+
+#loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #e8c547;
+    font-size: 18px;
+    letter-spacing: 4px;
+    z-index: 100;
+    transition: opacity 0.5s;
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Wanderer</title>
+</head>
+<body>
+    <div id="app">
+        <canvas id="c"></canvas>
+        <div id="ui-layer">
+            <div id="weather">☀ Early Morning</div>
+            <div id="music">
+                <div id="track">♪ No Track</div>
+                <div id="progress"><div id="bar"></div></div>
+            </div>
+            <div id="discovery" class="hidden">
+                <div id="type">Poetry</div>
+                <div id="content"></div>
+                <div id="author"></div>
+            </div>
+            <div id="controls">
+                <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> Move | 
+                <span class="key">SHIFT</span> Sprint | 
+                <span class="key">SPACE</span> Rain | 
+                <span class="key">T</span> Time | 
+                <span class="key">CLICK</span> Look
+            </div>
+        </div>
+        <div id="loading">GENERATING CITY...</div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
