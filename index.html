@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urban Wanderer</title>
+    <title>Artwal Wanderer</title>
 </head>
 <body>
     <div id="app">
         <canvas id="c"></canvas>
         <div id="ui-layer">
             <div id="weather">☀ Early Morning</div>
-            <div id="music">
+            <div id="music-player" style="display: none;"> 
                 <div id="track">♪ No Track</div>
-                <div id="progress"><div id="bar"></div></div>
+                <div style="color: #19a700; font-size: 10px;">Find music on walls</div>
+                <div id="track-progress">
+                    <div id="track-progress-bar"></div>
+                </div>
             </div>
             <div id="discovery" class="hidden">
                 <div id="type">Poetry</div>
