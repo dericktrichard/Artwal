@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 export const TRACKS = [
   { name: "Midnight Jazz", duration: 180, genre: "Jazz" },
   { name: "Rainy Lofi", duration: 240, genre: "Lofi" },
