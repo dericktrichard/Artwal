@@ -16,6 +16,7 @@ export function createMusicTexture(track) {
   ctx.fillStyle = '#1a1a1a';
   ctx.fillRect(0, 0, c.width, c.height);
   
+  // Vinyl grooves
   ctx.strokeStyle = '#333';
   for (let r = 30; r < 100; r += 10) {
     ctx.beginPath();
@@ -23,19 +24,26 @@ export function createMusicTexture(track) {
     ctx.stroke();
   }
   
+  // Center label
   ctx.fillStyle = '#e8c547';
   ctx.beginPath();
   ctx.arc(c.width/2, c.height/2, 25, 0, Math.PI*2);
   ctx.fill();
   
+  // Note icon
   ctx.fillStyle = '#1a1a1a';
   ctx.font = 'bold 30px serif';
   ctx.textAlign = 'center';
-  ctx.fillText('♪', c.width/2, c.height/2 + 10);
+  ctx.textBaseline = 'middle';
+  ctx.fillText('♪', c.width/2, c.height/2);
   
+  // Track name
   ctx.fillStyle = '#fff';
-  ctx.font = '12px monospace';
-  ctx.fillText(track.name, c.width/2, c.height - 30);
+  ctx.font = '11px monospace';
+  ctx.fillText(track.name, c.width/2, c.height - 35);
+  ctx.fillText(track.genre, c.width/2, c.height - 20);
   
-  return new THREE.CanvasTexture(c);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }

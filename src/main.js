@@ -1,9 +1,10 @@
 import './style.css';
 import * as THREE from 'three';
+import { audioManager } from './audio/AudioManager.js';
 
 import { renderer, camera, scene, handleResize } from './scene/setup.js';
 import { cycleTime } from './scene/lighting.js';
-import { createGround, createStreets } from './world/ground.js';
+import { createGround, createStreets, createPuddles, setWetGround, togglePuddles } from './world/ground.js';
 import { generateCity, buildings, interactables } from './world/buildings.js';
 import { generateStreetLights } from './world/furniture.js';
 import { initRain, toggleRain, isRaining, updateRain } from './weather/rain.js';
@@ -14,10 +15,23 @@ import { updateWeatherDisplay, showDiscovery, hideDiscovery, updateMusic, update
 // Init world
 createGround();
 createStreets();
+createPuddles();
 generateCity();
 generateStreetLights();
 createCharacter();
-initRain();
+
+// Init rain with callbacks for wet ground
+initRain(
+  () => { // On rain start
+    setWetGround(true);
+    togglePuddles(true);
+  },
+  () => { // On rain end
+    setWetGround(false);
+    togglePuddles(false);
+  }
+);
+
 initInput(document.getElementById('c'));
 
 // Player state
@@ -33,19 +47,28 @@ let currentTrack = null;
 let trackStart = 0;
 let nearbyInteractable = null;
 
-// Fixed: Use performance.now() instead of THREE.Clock
+// Use performance.now() instead of deprecated THREE.Clock
 let lastTime = performance.now();
 
 // Key handlers
 window.addEventListener('keydown', (e) => {
+  // Rain toggle
   if (e.code === 'Space') {
     const raining = toggleRain();
     toggleUmbrella(raining);
     updateWeatherDisplay((raining ? '🌧 ' : '☀ ') + 'Dawn');
   }
+  
+  // Time cycle
   if (e.code === 'KeyT') {
     const display = cycleTime(scene, isRaining());
     updateWeatherDisplay(display);
+  }
+  
+  // Stop music
+  if (e.code === 'KeyM') {
+    audioManager.stop();
+    resetMusic();
   }
 });
 
@@ -53,12 +76,12 @@ window.addEventListener('keydown', (e) => {
 function update() {
   requestAnimationFrame(update);
   
-  // Fixed: Manual delta time calculation
+  // Manual delta time calculation
   const now = performance.now();
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
   
-  // Movement
+  // Movement input
   let moveX = 0, moveZ = 0;
   if (keys['KeyW'] || keys['ArrowUp']) moveZ -= 1;
   if (keys['KeyS'] || keys['ArrowDown']) moveZ += 1;
@@ -70,21 +93,25 @@ function update() {
   const speed = sprint ? player.sprintSpeed : player.speed;
   
   if (isMoving) {
+    // Normalize input
     const len = Math.sqrt(moveX*moveX + moveZ*moveZ);
-    moveX /= len; moveZ /= len;
+    moveX /= len;
+    moveZ /= len;
     
-    const fx = Math.sin(camState.yaw);
-    const fz = Math.cos(camState.yaw);
-    const rx = Math.cos(camState.yaw);
-    const rz = -Math.sin(camState.yaw);
+    // FIXED: Camera-relative movement (removed the - that was reversing it)
+    const forwardX = Math.sin(camState.yaw);
+    const forwardZ = Math.cos(camState.yaw);
+    const rightX = Math.cos(camState.yaw);
+    const rightZ = -Math.sin(camState.yaw);
     
-    const wx = fx * -moveZ + rx * moveX;
-    const wz = fz * -moveZ + rz * moveX;
+    const worldX = forwardX * moveZ + rightX * moveX;
+    const worldZ = forwardZ * moveZ + rightZ * moveX;
     
-    player.rot = Math.atan2(wx, wz);
+    player.rot = Math.atan2(worldX, worldZ);
     
-    const newX = player.pos.x + wx * speed * dt;
-    const newZ = player.pos.z + wz * speed * dt;
+    // Collision detection
+    const newX = player.pos.x + worldX * speed * dt;
+    const newZ = player.pos.z + worldZ * speed * dt;
     
     let collideX = false, collideZ = false;
     for (const b of buildings) {
@@ -101,15 +128,12 @@ function update() {
     walkCycle *= 0.9;
   }
   
-  // Update character
-  charGroup.position.x = player.pos.x;
-  charGroup.position.z = player.pos.z;
+  // Update character position and animation
+  charGroup.position.copy(player.pos);
   charGroup.rotation.y = player.rot;
-  
-  // Updated animation with dt
   updateCharacterAnimation(walkCycle, isRaining(), dt);
   
-  // Camera
+  // Camera follow with smooth auto-rotation when locked
   if (camState.locked) {
     const targetYaw = player.rot + Math.PI;
     let diff = targetYaw - camState.yaw;
@@ -125,10 +149,10 @@ function update() {
   camera.position.set(camX, camY, camZ);
   camera.lookAt(player.pos.x, 1.4, player.pos.z);
   
-  // Weather
+  // Update weather effects
   updateRain(player.pos);
   
-  // Interactions
+  // Check interactions with poetry/music
   let found = false;
   for (const item of interactables) {
     if (!item.userData.interactPos) continue;
@@ -141,28 +165,31 @@ function update() {
         
         if (content.type === 'poem') {
           showDiscovery('POETRY', content.data.text.replace(/\n/g, '<br>'), '— ' + content.data.author);
-        } else {
+        } else if (content.type === 'music') {
           showDiscovery('MUSIC', content.data.name, content.data.genre);
           currentTrack = content.data;
           trackStart = Date.now();
           updateMusic(content.data.name);
+          audioManager.play(content.data.name);
         }
       }
       break;
     }
   }
   
+  // Hide discovery panel when walking away
   if (!found && nearbyInteractable) {
     nearbyInteractable = null;
     hideDiscovery();
   }
   
-  // Music progress
+  // Update music progress bar
   if (currentTrack) {
     const elapsed = (Date.now() - trackStart) / 1000;
     if (elapsed > currentTrack.duration) {
       currentTrack = null;
       resetMusic();
+      audioManager.stop();
     } else {
       updateMusicProgress((elapsed / currentTrack.duration) * 100);
     }
@@ -171,7 +198,9 @@ function update() {
   renderer.render(scene, camera);
 }
 
-// Start
+// Hide loading screen and start
 hideLoading();
 update();
+
+// Handle window resize
 window.addEventListener('resize', handleResize);

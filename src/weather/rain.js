@@ -1,11 +1,17 @@
 import * as THREE from 'three';
 import { scene } from '../scene/setup.js';
+import { setWetGround, togglePuddles } from '../world/ground.js';
 
 let rainSystem = null;
 let raining = false;
-const rainCount = 4000;
+const rainCount = 5000;
+let onRainStartCallback = null;
+let onRainEndCallback = null;
 
-export function initRain() {
+export function initRain(onStart, onEnd) {
+  onRainStartCallback = onStart;
+  onRainEndCallback = onEnd;
+  
   const rainGeo = new THREE.BufferGeometry();
   const rainPos = new Float32Array(rainCount * 3);
   
@@ -18,9 +24,10 @@ export function initRain() {
   rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
   const rainMat = new THREE.PointsMaterial({
     color: 0xaaccff,
-    size: 0.1,
+    size: 0.12,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending
   });
   
   rainSystem = new THREE.Points(rainGeo, rainMat);
@@ -31,6 +38,14 @@ export function initRain() {
 export function toggleRain() {
   raining = !raining;
   if (rainSystem) rainSystem.visible = raining;
+  
+  // Trigger callbacks
+  if (raining && onRainStartCallback) {
+    onRainStartCallback();
+  } else if (!raining && onRainEndCallback) {
+    onRainEndCallback();
+  }
+  
   return raining;
 }
 

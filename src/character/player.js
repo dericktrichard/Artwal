@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { scene } from '../scene/setup.js';
 
-// Materials
+// Materials with better properties
 const coatMat = new THREE.MeshStandardMaterial({ 
   color: 0x3d4550,
   roughness: 0.7,
@@ -20,7 +20,7 @@ const hpMat = new THREE.MeshStandardMaterial({
   roughness: 0.3,
   metalness: 0.6,
   emissive: 0xe8c547,
-  emissiveIntensity: 0.1
+  emissiveIntensity: 0.15
 });
 const scarfMat = new THREE.MeshStandardMaterial({
   color: 0x8b4513,
@@ -67,7 +67,7 @@ export function createCharacter() {
   collar.rotation.x = 0.2;
   bodyGroup.add(collar);
   
-  // Scarf
+  // Scarf (wrapped around neck)
   const scarf = new THREE.Mesh(
     new THREE.TorusGeometry(0.18, 0.08, 8, 16),
     scarfMat
@@ -93,23 +93,26 @@ export function createCharacter() {
     new THREE.BoxGeometry(0.37, 0.15, 0.4),
     darkMat
   );
-  hair.position.set(0, 1.95, 0);
+  hair.position.set(0, 1.97, 0);
   headGroup.add(hair);
   
   charGroup.add(headGroup);
   
-  // Premium Headphones
+  // FIXED: Headphones - Better positioned
   const hpGroup = new THREE.Group();
   
+  // Headband - properly arched over head
   const hpBand = new THREE.Mesh(
-    new THREE.TorusGeometry(0.24, 0.04, 8, 20, Math.PI),
+    new THREE.TorusGeometry(0.24, 0.04, 8, 24, Math.PI),
     hpMat
   );
   hpBand.position.y = 2.0;
   hpBand.rotation.z = Math.PI / 2;
   hpGroup.add(hpBand);
   
-  const cupGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.1, 12);
+  // Ear cups - properly sized and positioned
+  const cupGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.12, 16);
+  
   const cupL = new THREE.Mesh(cupGeo, hpMat);
   cupL.position.set(-0.24, 1.78, 0);
   cupL.rotation.z = Math.PI / 2;
@@ -120,12 +123,13 @@ export function createCharacter() {
   cupR.position.set(0.24, 1.78, 0);
   hpGroup.add(cupR);
   
-  // LED indicator
+  // LED indicator on right cup
   const led = new THREE.Mesh(
-    new THREE.BoxGeometry(0.02, 0.02, 0.02),
+    new THREE.CylinderGeometry(0.02, 0.02, 0.13, 8),
     new THREE.MeshBasicMaterial({ color: 0x00ff00 })
   );
-  led.position.set(0.24, 1.9, 0.08);
+  led.position.set(0.24, 1.78, 0.04);
+  led.rotation.z = Math.PI / 2;
   hpGroup.add(led);
   
   charGroup.add(hpGroup);
@@ -244,7 +248,7 @@ export function createCharacter() {
 export function updateCharacterAnimation(walkCycle, hasUmbrella, dt) {
   if (!legL || !body) return;
   
-  // Breathing animation
+  // Breathing animation when idle
   charGroup.userData.breathOffset += dt * 2;
   const breath = Math.sin(charGroup.userData.breathOffset) * 0.01;
   body.scale.y = 1 + breath;
@@ -273,6 +277,7 @@ export function updateCharacterAnimation(walkCycle, hasUmbrella, dt) {
       coatTail.rotation.x = 0.15 + Math.sin(walkCycle) * 0.05;
     }
   } else {
+    // Return to idle
     legL.rotation.x = THREE.MathUtils.lerp(legL.rotation.x, 0, 0.1);
     legR.rotation.x = THREE.MathUtils.lerp(legR.rotation.x, 0, 0.1);
     armL.rotation.x = THREE.MathUtils.lerp(armL.rotation.x, 0, 0.1);

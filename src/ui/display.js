@@ -28,19 +28,27 @@ export function hideDiscovery() {
 
 export function updateMusic(trackName) {
   const trackEl = document.getElementById('track');
+  const bar = document.getElementById('track-progress-bar');
+  const player = document.getElementById('music-player');
+  
   if (trackEl) trackEl.textContent = '♪ ' + trackName;
+  if (player) player.style.display = 'block'; // Show when playing
+  if (bar) bar.style.width = '0%';
 }
 
 export function updateMusicProgress(percent) {
-  const bar = document.getElementById('bar');
+  const bar = document.getElementById('track-progress-bar');
   if (bar) bar.style.width = percent + '%';
 }
 
 export function resetMusic() {
   const trackEl = document.getElementById('track');
-  const bar = document.getElementById('bar');
+  const bar = document.getElementById('track-progress-bar');
+  const player = document.getElementById('music-player');
+  
   if (trackEl) trackEl.textContent = '♪ No Track';
   if (bar) bar.style.width = '0%';
+  if (player) player.style.display = 'none'; // HIDE when no track
 }
 
 export function hideLoading() {

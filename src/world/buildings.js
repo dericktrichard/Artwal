@@ -16,6 +16,7 @@ export function createBuilding(x, z) {
   
   const group = new THREE.Group();
   
+  // Main building
   const geo = new THREE.BoxGeometry(width, height, depth);
   const mat = new THREE.MeshLambertMaterial({ color: 0x2a2a2a });
   const mesh = new THREE.Mesh(geo, mat);
@@ -46,11 +47,12 @@ export function createBuilding(x, z) {
     }
   }
   
-  // Content
+  // Add content (25% chance)
   if (Math.random() < 0.25) {
     const isPoem = Math.random() > 0.5;
     
     if (isPoem) {
+      // Poem
       const poem = POEMS[Math.floor(Math.random() * POEMS.length)];
       const tex = createPoemTexture(poem);
       const plane = new THREE.Mesh(
@@ -62,6 +64,7 @@ export function createBuilding(x, z) {
       
       group.userData.content = { type: 'poem', data: poem };
     } else {
+      // Music
       const track = TRACKS[Math.floor(Math.random() * TRACKS.length)];
       const tex = createMusicTexture(track);
       const plane = new THREE.Mesh(
@@ -71,6 +74,7 @@ export function createBuilding(x, z) {
       plane.position.set(0, height * 0.7, depth/2 + 0.1);
       group.add(plane);
       
+      // Glow light for music
       const glow = new THREE.PointLight(0xe8c547, 0.5, 5);
       glow.position.set(0, height * 0.7, depth/2 + 1);
       group.add(glow);
