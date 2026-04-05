@@ -33,7 +33,10 @@ let currentTrack = null;
 let trackStart = 0;
 let nearbyInteractable = null;
 
-// Key handlers for special actions
+// Fixed: Use performance.now() instead of THREE.Clock
+let lastTime = performance.now();
+
+// Key handlers
 window.addEventListener('keydown', (e) => {
   if (e.code === 'Space') {
     const raining = toggleRain();
@@ -47,10 +50,13 @@ window.addEventListener('keydown', (e) => {
 });
 
 // Game loop
-const clock = new THREE.Clock();
-
 function update() {
-  const dt = clock.getDelta();
+  requestAnimationFrame(update);
+  
+  // Fixed: Manual delta time calculation
+  const now = performance.now();
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
   
   // Movement
   let moveX = 0, moveZ = 0;
@@ -96,9 +102,12 @@ function update() {
   }
   
   // Update character
-  charGroup.position.copy(player.pos);
+  charGroup.position.x = player.pos.x;
+  charGroup.position.z = player.pos.z;
   charGroup.rotation.y = player.rot;
-  updateCharacterAnimation(walkCycle, isRaining());
+  
+  // Updated animation with dt
+  updateCharacterAnimation(walkCycle, isRaining(), dt);
   
   // Camera
   if (camState.locked) {
@@ -160,7 +169,6 @@ function update() {
   }
   
   renderer.render(scene, camera);
-  requestAnimationFrame(update);
 }
 
 // Start
